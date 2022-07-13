@@ -1,3 +1,4 @@
+use ansi_term::Colour::{Blue, Red};
 use merlin::Transcript;
 use rand::thread_rng;
 use rand::Rng;
@@ -17,18 +18,23 @@ fn main() {
     let keypair = Keypair::generate_with(prng);
 
     loop {
-        println!("public key: {:?}", keypair.public.to_bytes());
+        println!(
+            "{}: {:?}",
+            Blue.paint("Public key"),
+            keypair.public.to_bytes()
+        );
         let vrf_seed = get_random_seed();
-        println!("seed: {:?}", vrf_seed);
+        println!("{}: {:?}", Blue.paint("Seed"), vrf_seed);
 
         let (secret_number, signature) = vrf(&keypair, &vrf_seed);
-        println!("signature: {:?}", signature);
+        println!("{}: {:?}", Blue.paint("Signature"), signature);
 
         #[cfg(debug_assertions)]
-        println!("DEBUG: secret_number = {}", secret_number);
+        println!("{} {}", Red.paint("DEBUG: secret_number ="), secret_number);
 
         let mut count = 0;
         loop {
+            println!();
             let mut guess = String::new();
             println!("Your guess: ");
             if let Err(e) = io::stdin().read_line(&mut guess) {
