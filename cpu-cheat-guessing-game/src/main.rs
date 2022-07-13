@@ -1,3 +1,8 @@
+/*
+WORK IN PROGRESS
+Need binary tree to get the longest path for finding a number
+*/
+
 use std::io;
 use std::process;
 
