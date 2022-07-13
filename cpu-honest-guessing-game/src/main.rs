@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 use std::io;
 use std::process;
 
-const MAX_SECRET: u8 = 10;
+const MAX_SECRET_NUMBER: u8 = 10;
 
 fn main() {
     println!("Welcome to Honest guessing game.");
@@ -36,7 +36,7 @@ fn main() {
         loop {
             println!();
             let mut guess = String::new();
-            println!("Your guess: ");
+            println!("Enter your guess between 0 and {}: ", MAX_SECRET_NUMBER - 1);
             if let Err(e) = io::stdin().read_line(&mut guess) {
                 eprintln!("Error: {}", e);
                 process::exit(1);
@@ -91,7 +91,7 @@ fn vrf(keypair: &Keypair, vrf_seed: &[u8]) -> (u8, [u8; 96]) {
     t.append_message(b"seed", &vrf_seed);
     let (io, proof, _) = keypair.vrf_sign(t);
     let b: [u8; 8] = io.make_bytes(b"secret");
-    let secret_number = (u64::from_le_bytes(b) % (MAX_SECRET as u64)) as u8;
+    let secret_number = (u64::from_le_bytes(b) % (MAX_SECRET_NUMBER as u64)) as u8;
     let mut signature = [0u8; 96];
     // the first 32 bytes are io
     signature[..32].copy_from_slice(&io.to_preout().to_bytes()[..]);
@@ -100,6 +100,7 @@ fn vrf(keypair: &Keypair, vrf_seed: &[u8]) -> (u8, [u8; 96]) {
     (secret_number, signature)
 }
 
+// TODO: redundant code with vrf cuntion, please factor
 fn verify(public: &PublicKey, vrf_signature: &[u8; 96], vrf_seed: &[u8; 32]) -> Option<u8> {
     let mut t = Transcript::new(b"Secret Number Transcript");
     t.append_message(b"seed", vrf_seed);
@@ -107,6 +108,6 @@ fn verify(public: &PublicKey, vrf_signature: &[u8; 96], vrf_seed: &[u8; 32]) -> 
     let proof = VRFProof::from_bytes(&vrf_signature[32..96]).ok()?;
     let (io, _) = public.vrf_verify(t, &out, &proof).ok()?;
     let b: [u8; 8] = io.make_bytes(b"secret");
-    let secret_number = (u64::from_le_bytes(b) % (MAX_SECRET as u64)) as u8;
+    let secret_number = (u64::from_le_bytes(b) % (MAX_SECRET_NUMBER as u64)) as u8;
     Some(secret_number)
 }
