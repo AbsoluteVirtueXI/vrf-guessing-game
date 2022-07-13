@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "cpu-cheat-guessing-game",
+    "cpu-honest-guessing-game",
+]
